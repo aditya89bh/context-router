@@ -5,28 +5,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .context_types import ContextItem, ScoredContextItem
-
-
-def estimate_tokens(text: str) -> int:
-    """Lightweight token estimate used for local context budgeting."""
-    return len(text.split())
-
-
-def select_with_token_budget(items: list[ContextItem], max_tokens: int | None) -> list[ContextItem]:
-    """Select items in order until the token budget is exhausted."""
-    if max_tokens is None:
-        return items
-    if max_tokens < 0:
-        raise ValueError("max_tokens must be non-negative")
-
-    selected: list[ContextItem] = []
-    used = 0
-    for item in items:
-        item_tokens = estimate_tokens(item.text)
-        if used + item_tokens <= max_tokens:
-            selected.append(item)
-            used += item_tokens
-    return selected
+from .token_budget import estimate_tokens, select_with_token_budget, token_budget_metadata
 
 
 def _explain_selection(scored: ScoredContextItem) -> dict[str, Any]:
@@ -62,10 +41,8 @@ class ContextPack:
         summary_limit: int = 3,
         max_tokens: int | None = None,
     ) -> "ContextPack":
-        ranked_memories = [scored.item for scored in scored_items]
-        memories = select_with_token_budget(ranked_memories, max_tokens)
-        selected_ids = {item.id for item in memories}
-        selected_scored_items = [scored for scored in scored_items if scored.item.id in selected_ids]
+        selected_scored_items = select_with_token_budget(scored_items, max_tokens)
+        memories = [scored.item for scored in selected_scored_items]
         summaries = [item.text for item in memories[:summary_limit]]
         explanations = [_explain_selection(scored) for scored in selected_scored_items]
         return cls(
@@ -77,7 +54,7 @@ class ContextPack:
                 "count": len(memories),
                 "available_count": len(scored_items),
                 "max_tokens": max_tokens,
-                "estimated_tokens": sum(estimate_tokens(item.text) for item in memories),
+                **token_budget_metadata(selected_scored_items),
                 "scores": [scored.scores or {"final": scored.score} for scored in selected_scored_items],
                 "explanations": explanations,
             },

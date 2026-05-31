@@ -18,15 +18,18 @@ def estimate_tokens(text: str) -> int:
 
 def select_with_token_budget(
     scored_items: list[ScoredContextItem],
-    *,
-    max_tokens: int,
+    max_tokens: int | None,
 ) -> list[ScoredContextItem]:
-    """Select highest-ranked context items while staying inside a token budget.
+    """Select ranked context items while staying inside a token budget.
 
     The input should already be sorted by the router. Items that would exceed
     the remaining budget are skipped rather than truncating memory text.
     """
-    if max_tokens <= 0:
+    if max_tokens is None:
+        return scored_items
+    if max_tokens < 0:
+        raise ValueError("max_tokens must be non-negative")
+    if max_tokens == 0:
         return []
 
     selected: list[ScoredContextItem] = []

@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 
 import pytest
 
-from context_router.context.context_pack import ContextPack, estimate_tokens, select_with_token_budget
+from context_router.context.context_pack import ContextPack
+from context_router.context.token_budget import estimate_tokens, select_with_token_budget
 from context_router.context.context_types import ContextItem, ScoredContextItem
 
 
@@ -15,9 +16,13 @@ def test_estimate_tokens_counts_words():
 
 
 def test_select_with_token_budget_keeps_ordered_items_that_fit():
-    items = [make_item("1", "one two"), make_item("2", "three four five"), make_item("3", "six")]
-    selected = select_with_token_budget(items, max_tokens=3)
-    assert [item.id for item in selected] == ["1", "3"]
+    scored = [
+        ScoredContextItem(make_item("1", "one two"), 0.9),
+        ScoredContextItem(make_item("2", "three four five"), 0.8),
+        ScoredContextItem(make_item("3", "six"), 0.7),
+    ]
+    selected = select_with_token_budget(scored, max_tokens=4)
+    assert [item.item.id for item in selected] == ["1", "3"]
 
 
 def test_context_pack_applies_max_tokens():
