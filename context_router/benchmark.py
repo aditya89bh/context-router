@@ -1,10 +1,16 @@
 """Router comparison benchmark."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+import json
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 
 from context_router.demo_data import build_demo_store
-from context_router.evaluation import ROUTERS, evaluate_router
+from context_router.evaluation import DEFAULT_EVALUATION_CASES, ROUTERS, evaluate_results, evaluate_router
+
+DEFAULT_RESULTS_DIR = Path("benchmarks/results")
+DEFAULT_JSON_PATH = DEFAULT_RESULTS_DIR / "latest_results.json"
 
 
 @dataclass(frozen=True)
@@ -15,6 +21,50 @@ class BenchmarkRow:
     hit_rate: float
     avg_context_count: float
     context_reduction: float
+
+
+@dataclass(frozen=True)
+class BenchmarkResult:
+    router: str
+    query: str
+    expected_ids: list[str]
+    returned_ids: list[str]
+    precision: float
+    recall: float
+    selected_count: int
+
+
+def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
+    results: list[BenchmarkResult] = []
+    for router_name, router_cls in ROUTERS.items():
+        store = build_demo_store()
+        router = router_cls(store, top_k=top_k)
+        for case in DEFAULT_EVALUATION_CASES:
+            routed = router.route(case.query)
+            metrics = evaluate_results(routed, case.expected_ids, k=top_k)
+            results.append(
+                BenchmarkResult(
+                    router=router_name,
+                    query=case.query,
+                    expected_ids=sorted(case.expected_ids),
+                    returned_ids=[scored.item.id for scored in routed[:top_k]],
+                    precision=metrics["precision"],
+                    recall=metrics["recall"],
+                    selected_count=len(routed[:top_k]),
+                )
+            )
+    return results
+
+
+def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "top_k": top_k,
+        "results": [asdict(result) for result in collect_benchmark_results(top_k=top_k)],
+    }
+    path.write_text(json.dumps(payload, indent=2) + "\n")
+    return path
 
 
 def compare_routers(top_k: int = 3) -> list[BenchmarkRow]:
@@ -54,6 +104,8 @@ def format_markdown_table(rows: list[BenchmarkRow]) -> str:
 
 def main() -> None:
     print(format_markdown_table(compare_routers()))
+    path = write_json_results()
+    print(f"\nWrote JSON benchmark results to {path}")
 
 
 if __name__ == "__main__":

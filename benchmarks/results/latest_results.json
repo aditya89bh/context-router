@@ -1,0 +1,195 @@
+{
+  "generated_at": "2026-05-31T20:57:36.917110+00:00",
+  "top_k": 3,
+  "results": [
+    {
+      "router": "recency",
+      "query": "Prepare for the customer automation meeting",
+      "expected_ids": [
+        "customer-actions",
+        "customer-profile"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "coding-docker",
+        "customer-profile"
+      ],
+      "precision": 0.3333,
+      "recall": 0.5,
+      "selected_count": 3
+    },
+    {
+      "router": "recency",
+      "query": "Fix Docker build failure in CI",
+      "expected_ids": [
+        "coding-ci",
+        "coding-docker"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "coding-docker",
+        "customer-profile"
+      ],
+      "precision": 0.3333,
+      "recall": 0.5,
+      "selected_count": 3
+    },
+    {
+      "router": "recency",
+      "query": "Recover failed CNC pickup on the robot cell",
+      "expected_ids": [
+        "robot-cnc",
+        "robot-ros"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "coding-docker",
+        "customer-profile"
+      ],
+      "precision": 0.3333,
+      "recall": 0.5,
+      "selected_count": 3
+    },
+    {
+      "router": "semantic",
+      "query": "Prepare for the customer automation meeting",
+      "expected_ids": [
+        "customer-actions",
+        "customer-profile"
+      ],
+      "returned_ids": [
+        "customer-profile",
+        "customer-actions",
+        "coding-ci"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    },
+    {
+      "router": "semantic",
+      "query": "Fix Docker build failure in CI",
+      "expected_ids": [
+        "coding-ci",
+        "coding-docker"
+      ],
+      "returned_ids": [
+        "coding-ci",
+        "coding-docker",
+        "planning-calendar"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    },
+    {
+      "router": "semantic",
+      "query": "Recover failed CNC pickup on the robot cell",
+      "expected_ids": [
+        "robot-cnc",
+        "robot-ros"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "robot-ros",
+        "customer-profile"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    },
+    {
+      "router": "task",
+      "query": "Prepare for the customer automation meeting",
+      "expected_ids": [
+        "customer-actions",
+        "customer-profile"
+      ],
+      "returned_ids": [
+        "customer-profile",
+        "customer-actions"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "selected_count": 2
+    },
+    {
+      "router": "task",
+      "query": "Fix Docker build failure in CI",
+      "expected_ids": [
+        "coding-ci",
+        "coding-docker"
+      ],
+      "returned_ids": [
+        "coding-docker",
+        "coding-ci"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "selected_count": 2
+    },
+    {
+      "router": "task",
+      "query": "Recover failed CNC pickup on the robot cell",
+      "expected_ids": [
+        "robot-cnc",
+        "robot-ros"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "robot-ros"
+      ],
+      "precision": 1.0,
+      "recall": 1.0,
+      "selected_count": 2
+    },
+    {
+      "router": "hybrid",
+      "query": "Prepare for the customer automation meeting",
+      "expected_ids": [
+        "customer-actions",
+        "customer-profile"
+      ],
+      "returned_ids": [
+        "customer-profile",
+        "customer-actions",
+        "robot-cnc"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    },
+    {
+      "router": "hybrid",
+      "query": "Fix Docker build failure in CI",
+      "expected_ids": [
+        "coding-ci",
+        "coding-docker"
+      ],
+      "returned_ids": [
+        "coding-docker",
+        "coding-ci",
+        "customer-profile"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    },
+    {
+      "router": "hybrid",
+      "query": "Recover failed CNC pickup on the robot cell",
+      "expected_ids": [
+        "robot-cnc",
+        "robot-ros"
+      ],
+      "returned_ids": [
+        "robot-cnc",
+        "robot-ros",
+        "coding-docker"
+      ],
+      "precision": 0.6667,
+      "recall": 1.0,
+      "selected_count": 3
+    }
+  ]
+}
