@@ -9,14 +9,14 @@ This file captures sample outputs from `context-router` and demonstrates how exp
 Query:
 
 ```text
-Help me plan my Greece trip
+Prepare for the customer automation meeting
 ```
 
 Expected selected context:
 
 ```text
-[travel] Greece trip plan: Athens for history, Santorini for sunset, ferry buffer day, Schengen visa checklist.
-[travel] Book refundable hotels near metro stations and keep one day open for island weather changes.
+[customer] Customer meeting prep: Acme Manufacturing wants a low-risk automation rollout for end-of-line inspection.
+[customer] Open customer action items: confirm stakeholder list, prepare ROI estimate, and bring deployment timeline options.
 ```
 
 ### Coding agent
@@ -55,7 +55,7 @@ The demo store contains 7 context items. With `top_k=3`, each router sends at mo
 
 | Query | Router | Available items | Routed items | Reduction |
 |---|---|---:|---:|---:|
-| Help me plan my Greece trip | HybridRouter | 7 | 3 | 57.1% |
+| Prepare for the customer automation meeting | HybridRouter | 7 | 3 | 57.1% |
 | Fix Docker build failure | HybridRouter | 7 | 3 | 57.1% |
 | Recover failed CNC pickup | HybridRouter | 7 | 3 | 57.1% |
 | Recover failed CNC pickup | TaskRouter | 7 | 2 | 71.4% |
@@ -68,7 +68,7 @@ These are lightweight local demo benchmarks, not production retrieval evaluation
 |---|---|---|---|
 | RecencyRouter | any | most recent category | Good for latest state, not intent-aware |
 | SemanticRouter | Docker build failure | coding | Uses embedding similarity |
-| TaskRouter | Greece trip | travel | Uses category keywords |
+| TaskRouter | Customer meeting | customer | Uses category keywords |
 | TaskRouter | CNC pickup | robotics | Predictable domain routing |
 | HybridRouter | CNC pickup | robotics | Balances relevance, freshness, importance |
 
@@ -115,16 +115,16 @@ python -m context_router.evaluation
 
 ```csv
 router,query,expected,precision_at_k,category_hit,retrieved_categories
-recency,Help me plan my Greece trip,travel,0.333,True,robotics|coding|travel
-recency,Fix Docker build failure,coding,0.333,True,robotics|coding|travel
-recency,Recover failed CNC pickup,robotics,0.333,True,robotics|coding|travel
-semantic,Help me plan my Greece trip,travel,0.667,True,travel|personal|travel
-semantic,Fix Docker build failure,coding,0.667,True,coding|coding|travel
-semantic,Recover failed CNC pickup,robotics,0.667,True,robotics|robotics|travel
-task,Help me plan my Greece trip,travel,1.000,True,travel|travel
-task,Fix Docker build failure,coding,1.000,True,coding|coding
-task,Recover failed CNC pickup,robotics,1.000,True,robotics|robotics
-hybrid,Help me plan my Greece trip,travel,0.333,True,travel|robotics|coding
-hybrid,Fix Docker build failure,coding,0.667,True,coding|coding|robotics
-hybrid,Recover failed CNC pickup,robotics,0.667,True,robotics|robotics|coding
+recency,Prepare for the customer automation meeting,customer,0.333,True,robotics|coding|customer
+recency,Fix Docker build failure in CI,coding,0.333,True,robotics|coding|customer
+recency,Recover failed CNC pickup on the robot cell,robotics,0.333,True,robotics|coding|customer
+semantic,Prepare for the customer automation meeting,customer,0.667,True,customer|customer|coding
+semantic,Fix Docker build failure in CI,coding,0.667,True,coding|coding|planning
+semantic,Recover failed CNC pickup on the robot cell,robotics,0.667,True,robotics|robotics|customer
+task,Prepare for the customer automation meeting,customer,1.000,True,customer|customer
+task,Fix Docker build failure in CI,coding,1.000,True,coding|coding
+task,Recover failed CNC pickup on the robot cell,robotics,1.000,True,robotics|robotics
+hybrid,Prepare for the customer automation meeting,customer,0.667,True,customer|customer|robotics
+hybrid,Fix Docker build failure in CI,coding,0.667,True,coding|coding|customer
+hybrid,Recover failed CNC pickup on the robot cell,robotics,0.667,True,robotics|robotics|coding
 ```

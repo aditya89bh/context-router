@@ -79,12 +79,12 @@ python -m context_router.demo --query "Recover failed CNC pickup" --router task
 Example output:
 
 ```text
-Query: Help me plan my Greece trip
+Query: Prepare for the customer automation meeting
 Selected router: hybrid
 Retrieved contexts:
-  1. [travel] Greece trip plan: Athens for history, Santorini for sunset...
-  2. [travel] Book refundable hotels near metro stations...
-ContextPack summary: ContextPack(router=hybrid, items=3, categories=['travel', ...])
+  1. [customer] Customer meeting prep: Acme Manufacturing wants a low-risk automation rollout...
+  2. [customer] Open customer action items: confirm stakeholder list and ROI estimate...
+ContextPack summary: ContextPack(router=hybrid, items=3, categories=['customer', ...])
 ```
 
 ## Router comparison
@@ -220,7 +220,7 @@ See [`RESULTS.md`](RESULTS.md) for sample routing outputs and context reduction 
 
 | Query | Total memories | Routed memories | Reduction |
 |---|---:|---:|---:|
-| Greece trip | 7 | 3 | 57% |
+| Customer meeting | 7 | 3 | 57% |
 | Docker build | 7 | 3 | 57% |
 | CNC pickup | 7 | 3 | 57% |
 

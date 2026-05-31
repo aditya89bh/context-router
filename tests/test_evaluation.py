@@ -3,7 +3,7 @@ from context_router.evaluation import category_hit, evaluate_all, evaluate_route
 
 
 def test_precision_at_k_counts_expected_categories():
-    assert precision_at_k(["coding", "travel", "coding"], "coding", 3) == 2 / 3
+    assert precision_at_k(["coding", "customer", "coding"], "coding", 3) == 2 / 3
 
 
 def test_precision_at_k_handles_empty_categories():
@@ -11,8 +11,8 @@ def test_precision_at_k_handles_empty_categories():
 
 
 def test_category_hit_detects_present_category():
-    assert category_hit(["travel", "coding"], "coding") is True
-    assert category_hit(["travel"], "robotics") is False
+    assert category_hit(["customer", "coding"], "coding") is True
+    assert category_hit(["customer"], "robotics") is False
 
 
 def test_evaluate_router_returns_one_result_per_case():

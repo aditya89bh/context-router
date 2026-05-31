@@ -26,5 +26,5 @@ def test_recency_score_half_life():
 
 def test_relevance_scores_match_related_text():
     model = HashingEmbeddingModel()
-    scores = relevance_scores("docker build", ["docker build failed", "greece hotel"], model)
+    scores = relevance_scores("docker build", ["docker build failed", "customer meeting"], model)
     assert scores[0] > scores[1]

@@ -8,11 +8,9 @@ from context_router.scoring.importance import importance_score
 
 
 TASK_KEYWORDS: dict[str, set[str]] = {
-    "customer": {"customer", "meeting", "automation", "stakeholder", "roi", "deployment", "acme", "prep"},
+    "customer": {"customer", "meeting", "automation", "stakeholder", "roi", "deployment", "acme", "prep", "plan"},
     "coding": {"code", "docker", "build", "bug", "test", "python", "github", "ci", "deploy", "fix"},
-    "travel": {"trip", "travel", "flight", "hotel", "greece", "visa", "itinerary", "plan"},
     "robotics": {"robot", "robotics", "cnc", "pickup", "gripper", "ros", "rviz", "arm", "kinematic"},
-    "personal": {"email", "calendar", "remind", "habit", "family", "health", "personal"},
 }
 
 

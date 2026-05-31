@@ -28,8 +28,8 @@ def test_memory_store_get_recent():
 
 
 def test_memory_store_get_by_category():
-    store = MemoryStore([item(1, "coding"), item(2, "travel")])
-    assert store.get_by_category("travel")[0].id == "2"
+    store = MemoryStore([item(1, "coding"), item(2, "customer")])
+    assert store.get_by_category("customer")[0].id == "2"
 
 
 def test_memory_store_search():

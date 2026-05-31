@@ -60,7 +60,7 @@ def test_hybrid_router_prefers_relevant_robotics_memory():
 
 
 def test_top_k_respected():
-    assert len(HybridRouter(build_demo_store(), top_k=2).route("Greece trip")) == 2
+    assert len(HybridRouter(build_demo_store(), top_k=2).route("Customer meeting")) == 2
 
 
 def test_hybrid_router_accepts_custom_direct_weights():

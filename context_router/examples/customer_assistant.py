@@ -1,4 +1,4 @@
-"""Customer assistant example: retrieve travel context for a Greece trip."""
+"""Customer assistant example: retrieve customer context for an automation meeting."""
 from pathlib import Path
 import sys
 
@@ -10,7 +10,7 @@ from context_router.router.task_router import TaskRouter
 
 
 def run() -> ContextPack:
-    query = "Help me plan my Greece trip"
+    query = "Prepare for the customer automation meeting"
     router = TaskRouter(build_demo_store(), top_k=3)
     results = router.route(query)
     pack = ContextPack.from_scored(results, query=query, router=router.name)

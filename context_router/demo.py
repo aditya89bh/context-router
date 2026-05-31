@@ -20,7 +20,7 @@ ROUTERS = {
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Route the right context to the right agent at the right time.")
-    parser.add_argument("--query", default="Help me plan my Greece trip")
+    parser.add_argument("--query", default="Prepare for the customer automation meeting")
     parser.add_argument("--router", choices=ROUTERS.keys(), default="hybrid")
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--max-tokens", type=int, default=None, help="Approximate token budget for the ContextPack")
