@@ -44,3 +44,13 @@ def test_sqlite_store_persists_after_reopen(tmp_path):
 
     reopened = SQLiteMemoryStore(path)
     assert [item.id for item in reopened.all()] == ["persisted"]
+
+
+def test_sqlite_store_context_manager_closes_connection(tmp_path):
+    path = tmp_path / "memory.db"
+    with SQLiteMemoryStore(path) as store:
+        store.add(make_item("managed", "Managed connection", 1, "customer"))
+
+    reopened = SQLiteMemoryStore(path)
+    assert [item.id for item in reopened.all()] == ["managed"]
+

@@ -65,6 +65,12 @@ class SQLiteMemoryStore:
         rows = self.connection.execute(sql, params).fetchall()
         return [self._from_row(row) for row in rows]
 
+    def __enter__(self) -> "SQLiteMemoryStore":
+        return self
+
+    def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
+        self.close()
+
     def close(self) -> None:
         self.connection.close()
 
