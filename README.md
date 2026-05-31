@@ -17,22 +17,24 @@ Most agent prototypes send too much context: full memory logs, unrelated notes, 
 
 ```mermaid
 flowchart TD
-    Q[User / Agent Query] --> R{Router}
-    M[MemoryStore] --> R
+    MS[MemoryStore] --> R[Routers]
+    SMS[SQLiteMemoryStore] --> R
     R --> RR[RecencyRouter]
     R --> SR[SemanticRouter]
     R --> TR[TaskRouter]
     R --> HR[HybridRouter]
-    SR --> RS[Relevance Score]
-    HR --> RS
-    HR --> RC[Recency Score]
-    HR --> IM[Importance Score]
-    RR --> CP[ContextPack]
-    SR --> CP
-    TR --> CP
-    HR --> CP
-    CP --> A[Downstream Agent / LLM]
+    RR --> TB[Token Budget]
+    SR --> TB
+    TR --> TB
+    HR --> TB
+    TB --> CP[ContextPack]
+    CP --> A[Agent / LLM]
+
+    E[Evaluation Cases] -. measure .-> R
+    R -. results .-> B[Benchmark Reports]
 ```
+
+Storage stays separate from routing: `MemoryStore` and `SQLiteMemoryStore` provide context items, routers rank them, token budgeting constrains selected items, and `ContextPack` is the final output boundary for an agent or LLM. Evaluation cases and benchmark reports sit alongside the routing layer to measure quality and context reduction over time.
 
 ## Project structure
 
