@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from context_router.context.context_types import ScoredContextItem
 from context_router.context.memory_store import MemoryStore
+from context_router.router.base import BaseRouter
 from context_router.scoring.importance import importance_score
 
 
@@ -14,14 +15,13 @@ TASK_KEYWORDS: dict[str, set[str]] = {
 }
 
 
-class TaskRouter:
+class TaskRouter(BaseRouter):
     """Route context based on inferred task category."""
 
     name = "task"
 
     def __init__(self, store: MemoryStore, top_k: int = 5, task_keywords: dict[str, set[str]] | None = None) -> None:
-        self.store = store
-        self.top_k = top_k
+        super().__init__(store, top_k)
         self.task_keywords = task_keywords or TASK_KEYWORDS
 
     def classify(self, query: str) -> str:
