@@ -8,6 +8,7 @@ from context_router.scoring.importance import importance_score
 
 
 TASK_KEYWORDS: dict[str, set[str]] = {
+    "customer": {"customer", "meeting", "automation", "stakeholder", "roi", "deployment", "acme", "prep"},
     "coding": {"code", "docker", "build", "bug", "test", "python", "github", "ci", "deploy", "fix"},
     "travel": {"trip", "travel", "flight", "hotel", "greece", "visa", "itinerary", "plan"},
     "robotics": {"robot", "robotics", "cnc", "pickup", "gripper", "ros", "rviz", "arm", "kinematic"},
@@ -33,7 +34,7 @@ class TaskRouter(BaseRouter):
         )
         if ranked and ranked[0][1] > 0:
             return ranked[0][0]
-        return "personal"
+        return "customer"
 
     def route(self, query: str) -> list[ScoredContextItem]:
         category = self.classify(query)

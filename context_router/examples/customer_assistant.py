@@ -1,4 +1,4 @@
-"""Personal assistant example: retrieve travel context for a Greece trip."""
+"""Customer assistant example: retrieve travel context for a Greece trip."""
 from pathlib import Path
 import sys
 

@@ -52,7 +52,7 @@ context_router/
 │   ├── recency.py
 │   └── importance.py
 ├── examples/
-│   ├── personal_assistant.py
+│   ├── customer_assistant.py
 │   ├── coding_agent.py
 │   └── robotics_agent.py
 └── demo.py
@@ -117,7 +117,7 @@ ContextItem(
 ## Examples
 
 ```bash
-python context_router/examples/personal_assistant.py
+python context_router/examples/customer_assistant.py
 python context_router/examples/coding_agent.py
 python context_router/examples/robotics_agent.py
 ```

@@ -24,15 +24,15 @@ def test_semantic_router_returns_relevant_item():
     assert result.item.category == "coding"
 
 
-def test_task_router_classifies_travel():
+def test_task_router_classifies_customer():
     router = TaskRouter(build_demo_store())
-    assert router.classify("Help me plan my Greece trip") == "travel"
+    assert router.classify("Prepare for the customer automation meeting") == "customer"
 
 
-def test_task_router_returns_travel_memories():
-    results = TaskRouter(build_demo_store(), top_k=2).route("Help me plan my Greece trip")
+def test_task_router_returns_customer_memories():
+    results = TaskRouter(build_demo_store(), top_k=2).route("Prepare for the customer automation meeting")
     assert results
-    assert all(result.item.category == "travel" for result in results)
+    assert all(result.item.category == "customer" for result in results)
 
 
 def test_task_router_returns_coding_memories():

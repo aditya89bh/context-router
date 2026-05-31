@@ -4,7 +4,7 @@ This file captures sample outputs from `context-router` and demonstrates how exp
 
 ## Sample routing outputs
 
-### Personal assistant
+### Customer assistant
 
 Query:
 
