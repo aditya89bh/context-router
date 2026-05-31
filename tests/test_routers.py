@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from context_router.context.context_types import ContextItem
 from context_router.context.memory_store import MemoryStore
 from context_router.demo_data import build_demo_store
+from context_router.router.config import RouterConfig
 from context_router.router.hybrid_router import HybridRouter
 from context_router.router.recency_router import RecencyRouter
 from context_router.router.semantic_router import SemanticRouter
@@ -60,3 +61,20 @@ def test_hybrid_router_prefers_relevant_robotics_memory():
 
 def test_top_k_respected():
     assert len(HybridRouter(build_demo_store(), top_k=2).route("Greece trip")) == 2
+
+
+def test_hybrid_router_accepts_custom_direct_weights():
+    results = HybridRouter(
+        build_demo_store(),
+        top_k=1,
+        semantic_weight=0.0,
+        recency_weight=0.0,
+        importance_weight=1.0,
+    ).route("Recover failed CNC pickup")
+    assert results[0].scores["final"] == results[0].scores["importance"]
+
+
+def test_hybrid_router_accepts_router_config_weights():
+    config = RouterConfig(top_k=1, semantic_weight=0.0, recency_weight=1.0, importance_weight=0.0)
+    results = HybridRouter(build_demo_store(), config=config).route("Recover failed CNC pickup")
+    assert results[0].scores["final"] == results[0].scores["recency"]
