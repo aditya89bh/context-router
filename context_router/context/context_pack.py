@@ -7,6 +7,21 @@ from typing import Any
 from .context_types import ContextItem, ScoredContextItem
 
 
+def _explain_selection(scored: ScoredContextItem) -> dict[str, Any]:
+    """Build a compact, human-readable explanation for one selected item."""
+    score_details = scored.scores or {"final": scored.score}
+    numeric_scores = {key: value for key, value in score_details.items() if isinstance(value, int | float)}
+    strongest_signal = max(numeric_scores, key=numeric_scores.get) if numeric_scores else "score"
+    return {
+        "id": scored.item.id,
+        "category": scored.item.category,
+        "final_score": round(scored.score, 4),
+        "strongest_signal": strongest_signal,
+        "scores": {key: round(value, 4) for key, value in numeric_scores.items()},
+        "reason": f"Selected from {scored.item.category} context because {strongest_signal} was the strongest routing signal.",
+    }
+
+
 @dataclass
 class ContextPack:
     """A compact package of selected memories, summaries, and metadata."""
@@ -26,6 +41,7 @@ class ContextPack:
     ) -> "ContextPack":
         memories = [scored.item for scored in scored_items]
         summaries = [item.text for item in memories[:summary_limit]]
+        explanations = [_explain_selection(scored) for scored in scored_items]
         return cls(
             memories=memories,
             summaries=summaries,
@@ -34,6 +50,7 @@ class ContextPack:
                 "router": router,
                 "count": len(memories),
                 "scores": [scored.scores or {"final": scored.score} for scored in scored_items],
+                "explanations": explanations,
             },
         )
 
