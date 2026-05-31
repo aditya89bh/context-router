@@ -58,13 +58,67 @@ def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
 
 def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
+    results = [asdict(result) for result in collect_benchmark_results(top_k=top_k)]
+    generated_at = datetime.now(timezone.utc).isoformat()
+    if path.exists():
+        try:
+            existing = json.loads(path.read_text())
+            if existing.get("top_k") == top_k and existing.get("results") == results:
+                generated_at = existing.get("generated_at", generated_at)
+        except json.JSONDecodeError:
+            pass
     payload = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": generated_at,
         "top_k": top_k,
-        "results": [asdict(result) for result in collect_benchmark_results(top_k=top_k)],
+        "results": results,
     }
     path.write_text(json.dumps(payload, indent=2) + "\n")
     return path
+
+
+def write_markdown_report(json_path: Path = DEFAULT_JSON_PATH, markdown_path: Path | None = None) -> Path:
+    markdown_path = markdown_path or json_path.with_suffix(".md")
+    payload = json.loads(json_path.read_text())
+    results = payload["results"]
+
+    by_router: dict[str, list[dict[str, object]]] = {}
+    for result in results:
+        by_router.setdefault(str(result["router"]), []).append(result)
+
+    lines = [
+        "# Latest Router Benchmark",
+        "",
+        f"Generated at: `{payload['generated_at']}`",
+        "",
+        "## Summary by router",
+        "",
+        "| Router | Cases | Avg precision | Avg recall | Avg selected |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for router, router_results in by_router.items():
+        cases = len(router_results)
+        avg_precision = sum(float(item["precision"]) for item in router_results) / cases
+        avg_recall = sum(float(item["recall"]) for item in router_results) / cases
+        avg_selected = sum(int(item["selected_count"]) for item in router_results) / cases
+        lines.append(f"| {router} | {cases} | {avg_precision:.3f} | {avg_recall:.3f} | {avg_selected:.1f} |")
+
+    lines.extend([
+        "",
+        "## Per-query results",
+        "",
+        "| Router | Query | Expected IDs | Returned IDs | Precision | Recall | Selected |",
+        "|---|---|---|---|---:|---:|---:|",
+    ])
+    for result in results:
+        expected = ", ".join(result["expected_ids"])
+        returned = ", ".join(result["returned_ids"])
+        lines.append(
+            f"| {result['router']} | {result['query']} | {expected} | {returned} | "
+            f"{float(result['precision']):.3f} | {float(result['recall']):.3f} | {result['selected_count']} |"
+        )
+
+    markdown_path.write_text("\n".join(lines) + "\n")
+    return markdown_path
 
 
 def compare_routers(top_k: int = 3) -> list[BenchmarkRow]:
@@ -105,7 +159,9 @@ def format_markdown_table(rows: list[BenchmarkRow]) -> str:
 def main() -> None:
     print(format_markdown_table(compare_routers()))
     path = write_json_results()
+    report_path = write_markdown_report(path)
     print(f"\nWrote JSON benchmark results to {path}")
+    print(f"Wrote markdown benchmark report to {report_path}")
 
 
 if __name__ == "__main__":
