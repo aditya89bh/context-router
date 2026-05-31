@@ -20,6 +20,9 @@ dev = ["pytest>=7.4"]
 [tool.setuptools.packages.find]
 include = ["context_router*"]
 
+[tool.setuptools.package-data]
+context_router = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
