@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from time import perf_counter
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -32,6 +33,7 @@ class BenchmarkResult:
     precision: float
     recall: float
     selected_count: int
+    latency_ms: float
 
 
 def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
@@ -40,7 +42,9 @@ def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
         store = build_demo_store()
         router = router_cls(store, top_k=top_k)
         for case in DEFAULT_EVALUATION_CASES:
+            started_at = perf_counter()
             routed = router.route(case.query)
+            latency_ms = (perf_counter() - started_at) * 1000
             metrics = evaluate_results(routed, case.expected_ids, k=top_k)
             results.append(
                 BenchmarkResult(
@@ -51,6 +55,7 @@ def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
                     precision=metrics["precision"],
                     recall=metrics["recall"],
                     selected_count=len(routed[:top_k]),
+                    latency_ms=round(latency_ms, 3),
                 )
             )
     return results
@@ -92,29 +97,31 @@ def write_markdown_report(json_path: Path = DEFAULT_JSON_PATH, markdown_path: Pa
         "",
         "## Summary by router",
         "",
-        "| Router | Cases | Avg precision | Avg recall | Avg selected |",
-        "|---|---:|---:|---:|---:|",
+        "| Router | Cases | Avg precision | Avg recall | Avg selected | Avg latency ms |",
+        "|---|---:|---:|---:|---:|---:|",
     ]
     for router, router_results in by_router.items():
         cases = len(router_results)
         avg_precision = sum(float(item["precision"]) for item in router_results) / cases
         avg_recall = sum(float(item["recall"]) for item in router_results) / cases
         avg_selected = sum(int(item["selected_count"]) for item in router_results) / cases
-        lines.append(f"| {router} | {cases} | {avg_precision:.3f} | {avg_recall:.3f} | {avg_selected:.1f} |")
+        avg_latency = sum(float(item["latency_ms"]) for item in router_results) / cases
+        lines.append(f"| {router} | {cases} | {avg_precision:.3f} | {avg_recall:.3f} | {avg_selected:.1f} | {avg_latency:.3f} |")
 
     lines.extend([
         "",
         "## Per-query results",
         "",
-        "| Router | Query | Expected IDs | Returned IDs | Precision | Recall | Selected |",
-        "|---|---|---|---|---:|---:|---:|",
+        "| Router | Query | Expected IDs | Returned IDs | Precision | Recall | Selected | Latency ms |",
+        "|---|---|---|---|---:|---:|---:|---:|",
     ])
     for result in results:
         expected = ", ".join(result["expected_ids"])
         returned = ", ".join(result["returned_ids"])
         lines.append(
             f"| {result['router']} | {result['query']} | {expected} | {returned} | "
-            f"{float(result['precision']):.3f} | {float(result['recall']):.3f} | {result['selected_count']} |"
+            f"{float(result['precision']):.3f} | {float(result['recall']):.3f} | "
+            f"{result['selected_count']} | {float(result['latency_ms']):.3f} |"
         )
 
     markdown_path.write_text("\n".join(lines) + "\n")
