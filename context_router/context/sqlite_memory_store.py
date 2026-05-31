@@ -16,6 +16,7 @@ class SQLiteMemoryStore:
         self.connection = sqlite3.connect(self.path)
         self.connection.row_factory = sqlite3.Row
         self._create_table()
+        self._fts_enabled = self._create_fts_table()
 
     def _create_table(self) -> None:
         self.connection.execute(
@@ -31,6 +32,19 @@ class SQLiteMemoryStore:
         )
         self.connection.commit()
 
+    def _create_fts_table(self) -> bool:
+        try:
+            self.connection.execute(
+                """
+                CREATE VIRTUAL TABLE IF NOT EXISTS context_items_fts
+                USING fts5(id UNINDEXED, text, category UNINDEXED)
+                """
+            )
+            self.connection.commit()
+            return True
+        except sqlite3.OperationalError:
+            return False
+
     def add(self, item: ContextItem) -> None:
         self.connection.execute(
             """
@@ -39,6 +53,12 @@ class SQLiteMemoryStore:
             """,
             (item.id, item.text, item.timestamp.isoformat(), item.category, item.importance),
         )
+        if self._fts_enabled:
+            self.connection.execute("DELETE FROM context_items_fts WHERE id = ?", (item.id,))
+            self.connection.execute(
+                "INSERT INTO context_items_fts (id, text, category) VALUES (?, ?, ?)",
+                (item.id, item.text, item.category),
+            )
         self.connection.commit()
 
     def all(self) -> list[ContextItem]:
@@ -46,6 +66,21 @@ class SQLiteMemoryStore:
         return [self._from_row(row) for row in rows]
 
     def search(self, query: str) -> list[ContextItem]:
+        if self._fts_enabled and query.strip():
+            try:
+                rows = self.connection.execute(
+                    """
+                    SELECT c.*
+                    FROM context_items_fts f
+                    JOIN context_items c ON c.id = f.id
+                    WHERE context_items_fts MATCH ?
+                    ORDER BY c.timestamp DESC
+                    """,
+                    (query,),
+                ).fetchall()
+                return [self._from_row(row) for row in rows]
+            except sqlite3.OperationalError:
+                pass
         terms = {term.lower() for term in query.split()}
         return [item for item in self.all() if terms & set(item.text.lower().split())]
 

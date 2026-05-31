@@ -54,3 +54,12 @@ def test_sqlite_store_context_manager_closes_connection(tmp_path):
     reopened = SQLiteMemoryStore(path)
     assert [item.id for item in reopened.all()] == ["managed"]
 
+
+
+def test_sqlite_store_search_uses_expected_terms(tmp_path):
+    store = SQLiteMemoryStore(tmp_path / "memory.db")
+    store.add(make_item("docker", "Docker build failure in CI", 2, "coding"))
+    store.add(make_item("robot", "Robot pickup recovery", 1, "robotics"))
+
+    assert [item.id for item in store.search("Docker")] == ["docker"]
+
