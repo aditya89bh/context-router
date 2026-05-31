@@ -1,12 +1,14 @@
 """Router comparison benchmark."""
 from __future__ import annotations
 
+import argparse
 import json
 from time import perf_counter
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+from context_router.benchmark_data import build_synthetic_store, synthetic_evaluation_cases
 from context_router.demo_data import build_demo_store
 from context_router.evaluation import DEFAULT_EVALUATION_CASES, ROUTERS, evaluate_results, evaluate_router
 
@@ -36,12 +38,13 @@ class BenchmarkResult:
     latency_ms: float
 
 
-def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
+def collect_benchmark_results(top_k: int = 3, dataset_size: int | None = None) -> list[BenchmarkResult]:
     results: list[BenchmarkResult] = []
+    cases = synthetic_evaluation_cases() if dataset_size is not None else DEFAULT_EVALUATION_CASES
     for router_name, router_cls in ROUTERS.items():
-        store = build_demo_store()
+        store = build_synthetic_store(dataset_size) if dataset_size is not None else build_demo_store()
         router = router_cls(store, top_k=top_k)
-        for case in DEFAULT_EVALUATION_CASES:
+        for case in cases:
             started_at = perf_counter()
             routed = router.route(case.query)
             latency_ms = (perf_counter() - started_at) * 1000
@@ -61,20 +64,21 @@ def collect_benchmark_results(top_k: int = 3) -> list[BenchmarkResult]:
     return results
 
 
-def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3) -> Path:
+def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3, dataset_size: int | None = None) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    results = [asdict(result) for result in collect_benchmark_results(top_k=top_k)]
+    results = [asdict(result) for result in collect_benchmark_results(top_k=top_k, dataset_size=dataset_size)]
     generated_at = datetime.now(timezone.utc).isoformat()
     if path.exists():
         try:
             existing = json.loads(path.read_text())
-            if existing.get("top_k") == top_k and existing.get("results") == results:
+            if existing.get("top_k") == top_k and existing.get("dataset_size") == dataset_size and existing.get("results") == results:
                 generated_at = existing.get("generated_at", generated_at)
         except json.JSONDecodeError:
             pass
     payload = {
         "generated_at": generated_at,
         "top_k": top_k,
+        "dataset_size": dataset_size,
         "results": results,
     }
     path.write_text(json.dumps(payload, indent=2) + "\n")
@@ -128,19 +132,28 @@ def write_markdown_report(json_path: Path = DEFAULT_JSON_PATH, markdown_path: Pa
     return markdown_path
 
 
-def compare_routers(top_k: int = 3) -> list[BenchmarkRow]:
-    total_context = len(build_demo_store().all())
+def compare_routers(top_k: int = 3, dataset_size: int | None = None) -> list[BenchmarkRow]:
+    total_context = dataset_size if dataset_size is not None else len(build_demo_store().all())
     rows: list[BenchmarkRow] = []
+    synthetic_results = collect_benchmark_results(top_k=top_k, dataset_size=dataset_size) if dataset_size is not None else None
     for router_name in ROUTERS:
-        results = evaluate_router(router_name, top_k=top_k)
-        avg_precision = sum(result.precision_at_k for result in results) / len(results)
-        hit_rate = sum(result.category_hit for result in results) / len(results)
-        avg_count = sum(len(result.retrieved_categories) for result in results) / len(results)
+        if dataset_size is None:
+            eval_results = evaluate_router(router_name, top_k=top_k)
+            cases = len(eval_results)
+            avg_precision = sum(result.precision_at_k for result in eval_results) / cases
+            hit_rate = sum(result.category_hit for result in eval_results) / cases
+            avg_count = sum(len(result.retrieved_categories) for result in eval_results) / cases
+        else:
+            router_results = [result for result in synthetic_results or [] if result.router == router_name]
+            cases = len(router_results)
+            avg_precision = sum(result.precision for result in router_results) / cases
+            hit_rate = sum(result.recall > 0 for result in router_results) / cases
+            avg_count = sum(result.selected_count for result in router_results) / cases
         reduction = 1 - (avg_count / total_context)
         rows.append(
             BenchmarkRow(
                 router=router_name,
-                cases=len(results),
+                cases=cases,
                 avg_precision_at_k=avg_precision,
                 hit_rate=hit_rate,
                 avg_context_count=avg_count,
@@ -164,8 +177,14 @@ def format_markdown_table(rows: list[BenchmarkRow]) -> str:
 
 
 def main() -> None:
-    print(format_markdown_table(compare_routers()))
-    path = write_json_results()
+    parser = argparse.ArgumentParser(description="Run context-router benchmark reports.")
+    parser.add_argument("--dataset-size", type=int, choices=(100, 1000, 10000), default=None)
+    args = parser.parse_args()
+    print(format_markdown_table(compare_routers(dataset_size=args.dataset_size)))
+    path = DEFAULT_JSON_PATH
+    if args.dataset_size is not None:
+        path = DEFAULT_RESULTS_DIR / f"latest_results_{args.dataset_size}.json"
+    path = write_json_results(path=path, dataset_size=args.dataset_size)
     report_path = write_markdown_report(path)
     print(f"\nWrote JSON benchmark results to {path}")
     print(f"Wrote markdown benchmark report to {report_path}")

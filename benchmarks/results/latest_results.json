@@ -1,6 +1,7 @@
 {
-  "generated_at": "2026-05-31T21:19:18.040963+00:00",
+  "generated_at": "2026-05-31T21:22:46.442354+00:00",
   "top_k": 3,
+  "dataset_size": null,
   "results": [
     {
       "router": "recency",
@@ -17,7 +18,7 @@
       "precision": 0.3333,
       "recall": 0.5,
       "selected_count": 3,
-      "latency_ms": 0.021
+      "latency_ms": 0.023
     },
     {
       "router": "recency",
@@ -34,7 +35,7 @@
       "precision": 0.3333,
       "recall": 0.5,
       "selected_count": 3,
-      "latency_ms": 0.019
+      "latency_ms": 0.02
     },
     {
       "router": "recency",
@@ -51,7 +52,7 @@
       "precision": 0.3333,
       "recall": 0.5,
       "selected_count": 3,
-      "latency_ms": 0.018
+      "latency_ms": 0.019
     },
     {
       "router": "semantic",
@@ -68,7 +69,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.8
+      "latency_ms": 0.786
     },
     {
       "router": "semantic",
@@ -85,7 +86,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.791
+      "latency_ms": 0.826
     },
     {
       "router": "semantic",
@@ -102,7 +103,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.785
+      "latency_ms": 0.768
     },
     {
       "router": "task",
@@ -134,7 +135,7 @@
       "precision": 1.0,
       "recall": 1.0,
       "selected_count": 2,
-      "latency_ms": 0.016
+      "latency_ms": 0.017
     },
     {
       "router": "task",
@@ -150,7 +151,7 @@
       "precision": 1.0,
       "recall": 1.0,
       "selected_count": 2,
-      "latency_ms": 0.015
+      "latency_ms": 0.016
     },
     {
       "router": "hybrid",
@@ -167,7 +168,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.816
+      "latency_ms": 0.808
     },
     {
       "router": "hybrid",
@@ -184,7 +185,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.803
+      "latency_ms": 0.789
     },
     {
       "router": "hybrid",
@@ -201,7 +202,7 @@
       "precision": 0.6667,
       "recall": 1.0,
       "selected_count": 3,
-      "latency_ms": 0.811
+      "latency_ms": 0.806
     }
   ]
 }
