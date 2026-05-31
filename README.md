@@ -1,5 +1,9 @@
 # context-router
 
+[![CI](https://github.com/aditya89bh/context-router/actions/workflows/ci.yml/badge.svg)](https://github.com/aditya89bh/context-router/actions/workflows/ci.yml)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)
+![Typed](https://img.shields.io/badge/typed-py.typed-brightgreen)
+
 **Route the right context to the right agent at the right time.**
 
 `context-router` is a developer-grade Python reference implementation for agent systems that need to select relevant context instead of dumping every available memory into an LLM prompt.
