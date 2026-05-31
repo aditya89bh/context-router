@@ -124,9 +124,79 @@ python context_router/examples/robotics_agent.py
 
 Expected routing behavior:
 
-- `"Help me plan my Greece trip"` → travel memories
+- `"Prepare for the customer automation meeting"` → customer memories
 - `"Fix Docker build failure"` → coding memories
 - `"Recover failed CNC pickup"` → robotics memories
+
+
+## Production usage path
+
+### Public API imports
+
+```python
+from datetime import datetime, timezone
+
+from context_router import ContextItem, ContextPack, HybridRouter, MemoryStore
+
+store = MemoryStore()
+store.add(
+    ContextItem(
+        id="incident-docker",
+        text="Docker build fails when the base image misses libpq dependencies.",
+        timestamp=datetime.now(timezone.utc),
+        category="coding",
+        importance=0.9,
+    )
+)
+
+router = HybridRouter(store, top_k=3)
+ranked = router.route("Fix Docker build failure")
+pack = ContextPack.from_scored(ranked, query="Fix Docker build failure", router=router.name)
+```
+
+### Token budget example
+
+```python
+pack = ContextPack.from_scored(
+    ranked,
+    query="Fix Docker build failure",
+    router=router.name,
+    max_tokens=120,
+)
+print(pack.metadata["estimated_tokens"])
+```
+
+CLI equivalent:
+
+```bash
+python -m context_router.demo --query "Fix Docker build failure" --router hybrid --max-tokens 120
+```
+
+### Evaluation command
+
+```bash
+python -m context_router.evaluation
+python -m context_router.benchmark
+```
+
+### SQLite store example
+
+```python
+from context_router.context.sqlite_memory_store import SQLiteMemoryStore
+
+store = SQLiteMemoryStore("context.db")
+store.add(context_item)
+recent = store.get_recent(top_k=5)
+store.close()
+```
+
+### From demo to production
+
+1. Replace demo data with domain-specific `ContextItem` records.
+2. Use a durable store such as `SQLiteMemoryStore` or a future vector/database adapter.
+3. Tune `HybridRouter` weights with `RouterConfig` and evaluation cases.
+4. Apply token budgets at the `ContextPack` boundary before prompt assembly.
+5. Track benchmark metrics in CI or release checks.
 
 ## Semantic embeddings
 
