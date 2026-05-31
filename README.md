@@ -72,6 +72,19 @@ cd context-router
 python -m pip install -e .[dev]
 ```
 
+
+## Quickstart smoke test
+
+Run these commands after cloning to verify the package, demos, benchmark, and tests:
+
+```bash
+python -m pip install -e .[dev]
+python -m context_router.demo
+python -m context_router.demo --max-tokens 40
+python -m context_router.benchmark
+python -m pytest
+```
+
 ## Run the demo
 
 ```bash
