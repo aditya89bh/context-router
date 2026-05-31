@@ -3,17 +3,17 @@ from __future__ import annotations
 
 from context_router.context.context_types import ScoredContextItem
 from context_router.context.memory_store import MemoryStore
+from context_router.router.base import BaseRouter
 from context_router.scoring.recency import recency_score
 
 
-class RecencyRouter:
+class RecencyRouter(BaseRouter):
     """Return the most recent memories."""
 
     name = "recency"
 
     def __init__(self, store: MemoryStore, top_k: int = 5) -> None:
-        self.store = store
-        self.top_k = top_k
+        super().__init__(store, top_k=top_k)
 
     def route(self, query: str) -> list[ScoredContextItem]:
         items = self.store.get_recent(self.top_k)
