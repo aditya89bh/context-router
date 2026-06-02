@@ -54,7 +54,7 @@ def collect_benchmark_results(
         for case in cases:
             started_at = perf_counter()
             routed = router.route(case.query)
-            latency_ms = (perf_counter() - started_at) * 1000
+            latency_ms = 0.0 if fixture else (perf_counter() - started_at) * 1000
             metrics = evaluate_results(routed, case.expected_ids, k=top_k)
             results.append(
                 BenchmarkResult(
