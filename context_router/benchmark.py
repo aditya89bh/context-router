@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from context_router.benchmark_data import build_synthetic_store, synthetic_evaluation_cases
+from context_router.benchmark_fixtures import load_benchmark_fixture
+from context_router.context.store_protocol import ContextStoreProtocol
 from context_router.demo_data import build_demo_store
 from context_router.evaluation import DEFAULT_EVALUATION_CASES, ROUTERS, evaluate_results, evaluate_router
 
@@ -38,11 +40,16 @@ class BenchmarkResult:
     latency_ms: float
 
 
-def collect_benchmark_results(top_k: int = 3, dataset_size: int | None = None) -> list[BenchmarkResult]:
+def collect_benchmark_results(
+    top_k: int = 3,
+    dataset_size: int | None = None,
+    fixture_path: Path | None = None,
+) -> list[BenchmarkResult]:
     results: list[BenchmarkResult] = []
-    cases = synthetic_evaluation_cases() if dataset_size is not None else DEFAULT_EVALUATION_CASES
+    fixture = load_benchmark_fixture(fixture_path) if fixture_path is not None else None
+    cases = fixture.cases if fixture else synthetic_evaluation_cases() if dataset_size is not None else DEFAULT_EVALUATION_CASES
     for router_name, router_cls in ROUTERS.items():
-        store = build_synthetic_store(dataset_size) if dataset_size is not None else build_demo_store()
+        store: ContextStoreProtocol = fixture.store if fixture else build_synthetic_store(dataset_size) if dataset_size is not None else build_demo_store()
         router = router_cls(store, top_k=top_k)
         for case in cases:
             started_at = perf_counter()
@@ -64,9 +71,14 @@ def collect_benchmark_results(top_k: int = 3, dataset_size: int | None = None) -
     return results
 
 
-def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3, dataset_size: int | None = None) -> Path:
+def write_json_results(
+    path: Path = DEFAULT_JSON_PATH,
+    top_k: int = 3,
+    dataset_size: int | None = None,
+    fixture_path: Path | None = None,
+) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    results = [asdict(result) for result in collect_benchmark_results(top_k=top_k, dataset_size=dataset_size)]
+    results = [asdict(result) for result in collect_benchmark_results(top_k=top_k, dataset_size=dataset_size, fixture_path=fixture_path)]
     generated_at = datetime.now(timezone.utc).isoformat()
     if path.exists():
         try:
@@ -79,6 +91,7 @@ def write_json_results(path: Path = DEFAULT_JSON_PATH, top_k: int = 3, dataset_s
         "generated_at": generated_at,
         "top_k": top_k,
         "dataset_size": dataset_size,
+        "fixture": str(fixture_path) if fixture_path is not None else None,
         "results": results,
     }
     path.write_text(json.dumps(payload, indent=2) + "\n")
@@ -132,12 +145,13 @@ def write_markdown_report(json_path: Path = DEFAULT_JSON_PATH, markdown_path: Pa
     return markdown_path
 
 
-def compare_routers(top_k: int = 3, dataset_size: int | None = None) -> list[BenchmarkRow]:
-    total_context = dataset_size if dataset_size is not None else len(build_demo_store().all())
+def compare_routers(top_k: int = 3, dataset_size: int | None = None, fixture_path: Path | None = None) -> list[BenchmarkRow]:
+    fixture = load_benchmark_fixture(fixture_path) if fixture_path is not None else None
+    total_context = len(fixture.store.all()) if fixture else dataset_size if dataset_size is not None else len(build_demo_store().all())
     rows: list[BenchmarkRow] = []
-    synthetic_results = collect_benchmark_results(top_k=top_k, dataset_size=dataset_size) if dataset_size is not None else None
+    synthetic_results = collect_benchmark_results(top_k=top_k, dataset_size=dataset_size, fixture_path=fixture_path) if dataset_size is not None or fixture else None
     for router_name in ROUTERS:
-        if dataset_size is None:
+        if dataset_size is None and fixture is None:
             eval_results = evaluate_router(router_name, top_k=top_k)
             cases = len(eval_results)
             avg_precision = sum(result.precision_at_k for result in eval_results) / cases
@@ -179,12 +193,13 @@ def format_markdown_table(rows: list[BenchmarkRow]) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run context-router benchmark reports.")
     parser.add_argument("--dataset-size", type=int, choices=(100, 1000, 10000), default=None)
+    parser.add_argument("--fixture", type=Path, default=None, help="Path to deterministic benchmark fixture JSON")
     args = parser.parse_args()
-    print(format_markdown_table(compare_routers(dataset_size=args.dataset_size)))
+    print(format_markdown_table(compare_routers(dataset_size=args.dataset_size, fixture_path=args.fixture)))
     path = DEFAULT_JSON_PATH
     if args.dataset_size is not None:
         path = DEFAULT_RESULTS_DIR / f"latest_results_{args.dataset_size}.json"
-    path = write_json_results(path=path, dataset_size=args.dataset_size)
+    path = write_json_results(path=path, dataset_size=args.dataset_size, fixture_path=args.fixture)
     report_path = write_markdown_report(path)
     print(f"\nWrote JSON benchmark results to {path}")
     print(f"Wrote markdown benchmark report to {report_path}")

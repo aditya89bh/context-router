@@ -1,0 +1,43 @@
+{
+  "name": "enterprise_contexts",
+  "items": [
+    {
+      "id": "ops-incident-1",
+      "text": "Operations incident review for service latency, rollback decision, escalation owner, and customer communication plan.",
+      "timestamp": "2024-01-04T10:00:00+00:00",
+      "category": "operations",
+      "importance": 0.9
+    },
+    {
+      "id": "security-review-1",
+      "text": "Security review notes for access rotation, audit evidence, dependency review, and deployment approval.",
+      "timestamp": "2024-01-04T09:00:00+00:00",
+      "category": "security",
+      "importance": 0.8
+    },
+    {
+      "id": "customer-rollout-1",
+      "text": "Customer rollout plan covering stakeholder alignment, training schedule, support readiness, and success metrics.",
+      "timestamp": "2024-01-04T08:00:00+00:00",
+      "category": "customer",
+      "importance": 0.7
+    }
+  ],
+  "cases": [
+    {
+      "query": "Review service latency incident and rollback owner",
+      "expected_ids": ["ops-incident-1"],
+      "expected_category": "operations"
+    },
+    {
+      "query": "Prepare audit evidence for deployment approval",
+      "expected_ids": ["security-review-1"],
+      "expected_category": "security"
+    },
+    {
+      "query": "Plan customer rollout training and success metrics",
+      "expected_ids": ["customer-rollout-1"],
+      "expected_category": "customer"
+    }
+  ]
+}
