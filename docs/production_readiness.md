@@ -68,7 +68,7 @@ Before sending context to a model:
 - [ ] Replace approximate token counter with model tokenizer
 - [ ] Add domain-specific eval set
 - [ ] Add latency and cost monitoring
-- [ ] Add PII/secret filtering
+- [x] Add lightweight PII/secret filtering utility
 - [ ] Define context retention policy
 - [ ] Add release/versioning process
 

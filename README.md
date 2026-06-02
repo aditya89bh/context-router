@@ -51,6 +51,8 @@ context_router/
 │   └── hybrid_router.py
 ├── context/
 │   ├── memory_store.py
+│   ├── sqlite_memory_store.py
+│   ├── store_protocol.py
 │   ├── context_pack.py
 │   └── context_types.py
 ├── scoring/
@@ -196,6 +198,7 @@ python -m context_router.demo --query "Fix Docker build failure" --router hybrid
 ```bash
 python -m context_router.evaluation
 python -m context_router.benchmark
+python -m context_router.benchmark --fixture benchmarks/fixtures/enterprise_contexts.json
 ```
 
 ### SQLite store example
@@ -251,12 +254,12 @@ The repository includes coverage for recency routing, semantic routing, task rou
 
 ## Future roadmap
 
-- persistent stores: SQLite, Postgres, Redis
-- vector DB adapters: FAISS, Qdrant, Chroma
+Future work should be issue-driven after v0.1.0. Possible directions include:
+
+- optional vector DB adapters when a real integration need appears
 - learned task classifiers
 - feedback-based importance updates
-- token-budget-aware `ContextPack` compression
-- router evaluation harness with precision/recall metrics
+- model-specific tokenizers for strict token budgets
 - MCP/server mode for agent frameworks
 
 ## License

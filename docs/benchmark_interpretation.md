@@ -25,3 +25,13 @@ Good routing usually needs both: enough expected context and not too much noise.
 ## Reading `latest_results.md`
 
 `benchmarks/results/latest_results.md` is human-readable. Use the summary table to compare routers quickly, then inspect the per-query table to understand specific misses or noisy selections.
+
+## Deterministic fixtures
+
+Use fixture mode when you need repeatable benchmark outputs for release checks:
+
+```bash
+python -m context_router.benchmark --fixture benchmarks/fixtures/enterprise_contexts.json
+```
+
+Fixture-mode benchmark latency is normalized for deterministic output comparisons. Normal benchmark runs still measure runtime latency.

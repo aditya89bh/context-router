@@ -20,6 +20,10 @@ Output boundary for downstream agents. Use `ContextPack.from_scored(...)` to pac
 
 ## Stores
 
+### `ContextStoreProtocol`
+
+Structural protocol for store implementations. Defines `add()`, `all()`, `search()`, `get_recent()`, and `get_by_category()`.
+
 ### `MemoryStore`
 
 In-memory store for demos and tests.
@@ -83,3 +87,9 @@ Defined in `context_router.context.token_budget`:
 - `token_budget_metadata(scored_items)`
 
 These helpers are intentionally lightweight and can be replaced by model-specific tokenizers in production integrations.
+
+## Utility helpers
+
+- `context_router.deprecation`: standard-library deprecation warning helpers.
+- `context_router.context.pii_filter.sanitize_text`: optional email, phone, and API-key-like redaction utility.
+- `context_router.context.validation`: explicit context field validation helpers.
