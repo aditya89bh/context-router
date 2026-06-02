@@ -6,9 +6,10 @@ from datetime import datetime
 from pathlib import Path
 
 from context_router.context.context_types import ContextItem
+from context_router.context.store_protocol import ContextStoreProtocol
 
 
-class SQLiteMemoryStore:
+class SQLiteMemoryStore(ContextStoreProtocol):
     """Durable MemoryStore-compatible implementation backed by sqlite3."""
 
     def __init__(self, path: str | Path) -> None:

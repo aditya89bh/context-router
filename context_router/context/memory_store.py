@@ -5,9 +5,10 @@ from collections.abc import Iterable
 from datetime import datetime
 
 from .context_types import ContextItem
+from .store_protocol import ContextStoreProtocol
 
 
-class MemoryStore:
+class MemoryStore(ContextStoreProtocol):
     """Simple in-memory store for ContextItem objects."""
 
     def __init__(self, items: Iterable[ContextItem] | None = None) -> None:
